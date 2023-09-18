@@ -1,0 +1,109 @@
+import pygame,sys,random
+from pygame.locals import*
+screen = pygame.display.set_mode((864,768))
+
+#floor xy
+floor_x,floor_y=(0,650)
+floor = pygame.image.load("D:\\học tập kì 5\\python\\pygame\\image\\floor.png").convert()
+floor= pygame.transform.scale2x(floor)
+
+#backgound xy
+bg_x,bg_y=(0,0)
+bg = pygame.image.load("D:\\học tập kì 5\\python\\pygame\\image\\background-night.png").convert()
+bg= pygame.transform.scale2x(bg)
+
+#bird
+bird = pygame.image.load("D:\\học tập kì 5\\python\\pygame\\image\\ufo.png")
+bird_x,bird_y=(100,375)
+gravity = 0.1 #trong luc cua chim
+bird_rec=bird.get_rect(center=(bird_x,bird_y))
+bird_movement=0
+
+#pipe
+heigh=[500,280,1000]
+time_run=[2000,1200,2500]
+pipe_list=[]
+pipe_surface = pygame.image.load("D:\\học tập kì 5\\python\\pygame\\image\\pipe-green.png") #load anh ong
+pipe_surface = pygame.transform.scale2x(pipe_surface) #phong to ong
+#set time pipes
+t_run=random.choice(time_run)
+pipes_event = pygame.USEREVENT
+pygame.time.set_timer(pipes_event,t_run)
+def draw_pipes(pipes):
+    for pipe in pipes:
+        # if pipe.top<0:
+        #     screen.blit(pipe_surface,pipe)
+        # else:
+        #     pipe_flip = pygame.transform.flip(pipe_surface,False,True)
+        #     screen.blit(pipe_flip,pipe)
+        pipe_flip = pygame.transform.flip(pipe_surface,False,True)
+        screen.blit(pipe_flip,pipe)
+        print(pipe.top)
+def make_pipe():
+    tmp=random.choice(heigh)
+    
+    bottom_pipe= pipe_surface.get_rect(midtop=(900,tmp))
+    top_pipe= pipe_surface.get_rect(midtop=(900,tmp-800))
+
+    return bottom_pipe,top_pipe
+def move_pipes(pipes): # di chuyen column
+    for p in pipes:
+        p.centerx-=3
+    return pipes
+clock = pygame.time.Clock()
+#main
+while True:
+    #event
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                bird_movement=0
+                bird_movement-=5
+            elif event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+        elif event.type == MOUSEBUTTONDOWN:
+            bird_movement=0
+            bird_movement-=5
+        elif event.type == pipes_event:
+            pipe_list.extend(make_pipe())
+
+    # bg moving
+    screen.blit(bg,(bg_x,bg_y))
+    screen.blit(bg,(bg_x+432,bg_y))
+    screen.blit(bg,(bg_x+432*2,bg_y))
+    screen.blit(bg,(bg_x+432*3,bg_y))
+    bg_x-=0.5
+    if bg_x<=-432*2:
+        bg_x=0
+
+    #pipe
+    pipe_list=move_pipes(pipe_list)
+    draw_pipes(pipe_list)
+
+    # floor moving
+    screen.blit(floor,(floor_x,floor_y))
+    screen.blit(floor,(floor_x+432,floor_y))
+    screen.blit(floor,(floor_x+432*2,floor_y))
+    screen.blit(floor,(floor_x+432*3,floor_y))
+    floor_x-=2
+    if floor_x<=-432*2:
+        floor_x=0
+
+    #bird moving
+    screen.blit(bird,bird_rec)
+    bird_movement+=gravity
+    bird_rec.centery+=bird_movement
+    if bird_rec.centery>700:
+        bird_movement=0
+    if bird_rec.centery<=35:
+        bird_movement+=0.5
+    
+    
+
+    pygame.display.update()
+    clock.tick(144)
+    
